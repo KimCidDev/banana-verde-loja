@@ -654,3 +654,11 @@ section, .section { scroll-margin-top: 120px; }
 .rail { scroll-padding: 0 18px; }
 .field-row > * { min-width: 0; }
 .field input { width: 100%; min-width: 0; }
+
+/* CTAs do topo: botão principal ocupa o espaço que precisa, sem quebrar linha */
+.btn { text-align: center; }
+.hero-ctas { grid-template-columns: 1fr auto; }
+.hero-ctas .btn { white-space: nowrap; }
+@media (max-width: 340px) {
+  .hero-ctas .btn { font-size: 14.5px; padding: 0 12px; }
+}
