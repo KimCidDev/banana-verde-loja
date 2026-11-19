@@ -38,8 +38,24 @@
     if (typeof p.price === "number") return '<span class="price">' + money(p.price) + "</span>";
     return '<span class="price price--tbc">R$ ' + tbc() + "</span>";
   }
+  var SIM = STORE.sim;
+  function installmentsCount(total) {
+    return Math.max(1, Math.min(SIM.maxInstallments, Math.floor(total / SIM.minInstallment)));
+  }
+  function installmentsText(total, short) {
+    var n = installmentsCount(total);
+    if (n < 2) return "à vista no cartão";
+    return n + "x de " + money(Math.round(total * 100 / n) / 100) + (short ? "" : " sem juros");
+  }
+  // frete simulado: retirada grátis; POA grátis acima do mínimo; envio só com CEP completo
+  function deliveryFee(type, subtotal, cep) {
+    if (type === "retirada") return SIM.pickup.fee;
+    if (type === "poa") return subtotal >= SIM.freePoaFrom ? 0 : SIM.poa.fee;
+    return String(cep || "").replace(/\D/g, "").length === 8 ? SIM.ship.fee : null;
+  }
+  function feeText(fee) { return fee === null ? "informe o CEP" : (fee === 0 ? "Grátis" : money(fee)); }
   function stockHTML(p) {
-    if (p.stock === true) return '<span class="stock stock--ok">Disponível</span>';
+    if (p.stock === true) return '<span class="stock stock--ok">Em estoque</span>';
     if (p.stock === false) return '<span class="stock stock--out">Esgotado</span>';
     return '<span class="stock">Disponibilidade ' + tbc() + "</span>";
   }
@@ -86,14 +102,12 @@
   };
   var STARS = ICON.star + ICON.star + ICON.star + ICON.star + ICON.star;
 
+  // Foto do produto. Se o arquivo não carregar, a imagem é removida e fica a ilustração.
   function photoHTML(p, big) {
-    if (p.photo) {
-      return '<img class="ph-img" src="' + esc(p.photo) + '" alt="' + esc(p.name) + '" loading="lazy">';
-    }
-    return '<div class="ph ph--' + esc(p.tone || "sage") + (big ? " ph--big" : "") + '" role="img" aria-label="Espaço para a foto: ' + esc(p.name) + '">' +
+    return '<div class="ph ph--' + esc(p.tone || "sage") + (big ? " ph--big" : "") + '">' +
       ICON.leaf +
       '<span class="ph-name">' + esc(p.name) + "</span>" +
-      '<span class="ph-note">foto da loja · a confirmar</span>' +
+      (p.photo ? '<img class="ph-img" src="' + esc(p.photo) + '" alt="' + esc(p.name) + '" loading="lazy">' : "") +
       "</div>";
   }
 
@@ -173,7 +187,7 @@
       '<div class="card-body">' +
         '<a class="card-title" href="#/produto/' + p.slug + '">' + esc(p.name) + "</a>" +
         priceHTML(p) +
-        '<span class="card-installments">Parcele no cartão</span>' +
+        '<span class="card-installments">' + installmentsText(p.price, true) + "</span>" +
         '<div class="card-actions">' +
           '<button type="button" class="btn btn--primary btn--sm" data-action="add" data-slug="' + p.slug + '">Adicionar</button>' +
           '<a class="btn-wa-mini" href="' + waProduct(p) + '" target="_blank" rel="noopener" aria-label="Comprar ' + esc(p.name) + ' pelo WhatsApp">' + ICON.wa + "</a>" +
@@ -202,21 +216,17 @@
 
   function deliveryInfoHTML() {
     return '<ul class="perks">' +
-      "<li>" + ICON.card + "<div><strong>Parcele sua compra</strong><span>no cartão de crédito · nº de parcelas " + tbc() + "</span></div></li>" +
-      "<li>" + ICON.store + "<div><strong>Retire na loja</strong><span>" + esc(STORE.address) + " · em frente ao parque</span></div></li>" +
-      "<li>" + ICON.bike + "<div><strong>Entrega em Porto Alegre</strong><span>custo e prazo " + tbc() + "</span></div></li>" +
-      "<li>" + ICON.box + "<div><strong>Enviamos o seu pedido</strong><span>até a sua casa · frete e prazo pelo CEP " + tbc() + "</span></div></li>" +
+      "<li>" + ICON.card + "<div><strong>Parcele sua compra</strong><span>em até " + SIM.maxInstallments + "x sem juros no cartão de crédito</span></div></li>" +
+      "<li>" + ICON.store + "<div><strong>Retire na loja</strong><span>Grátis · " + SIM.pickup.time + " na " + esc(STORE.address) + "</span></div></li>" +
+      "<li>" + ICON.bike + "<div><strong>Entrega em Porto Alegre</strong><span>" + SIM.poa.time + " · grátis acima de " + money(SIM.freePoaFrom) + "</span></div></li>" +
+      "<li>" + ICON.box + "<div><strong>Enviamos o seu pedido</strong><span>até a sua casa · " + SIM.ship.time + "</span></div></li>" +
     "</ul>";
   }
 
   function hoursHTML() {
     return '<div class="hours">' +
       '<div class="hours-head">' + ICON.clock + "<strong>Horário de funcionamento</strong></div>" +
-      "<dl>" +
-        "<div><dt>Segunda a sexta</dt><dd>" + tbc() + "</dd></div>" +
-        "<div><dt>Sábado</dt><dd>" + tbc() + "</dd></div>" +
-        "<div><dt>Domingo</dt><dd>" + tbc() + "</dd></div>" +
-      "</dl>" +
+      "<dl>" + STORE.hours.map(function (h) { return "<div><dt>" + esc(h[0]) + "</dt><dd>" + esc(h[1]) + "</dd></div>"; }).join("") + "</dl>" +
     "</div>";
   }
 
@@ -233,7 +243,6 @@
               '<a class="btn btn--wa" href="' + waLink("Olá, Banana Verde! Vim pela loja online.") + '" target="_blank" rel="noopener">' + ICON.wa + " " + esc(STORE.phoneDisplay) + "</a>" +
               '<a class="btn btn--ghost" href="' + MAPS_LINK + '" target="_blank" rel="noopener">Como chegar</a>' +
             "</div>" +
-            '<p class="small muted">Estacionamento e acesso: ' + tbc() + "</p>" +
           "</div>" +
           '<div class="map">' +
             '<iframe title="Mapa: Banana Verde, ' + esc(STORE.address) + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=' + MAPS_QUERY + '&z=16&output=embed"></iframe>' +
@@ -263,6 +272,7 @@
           '<a class="btn btn--primary" href="#/categoria/casa-ecologica">Ver Casa Ecológica</a>' +
           '<a class="btn btn--wa-outline" href="' + waLink("Olá, Banana Verde! Vim pela loja online e quero tirar uma dúvida.") + '" target="_blank" rel="noopener">' + ICON.wa + " WhatsApp</a>" +
         "</div>" +
+        '<div class="hero-photo"><img class="hero-img" src="img/hero.jpg" alt="Produtos ecológicos para a casa"></div>' +
       "</div>" +
     "</section>" +
 
@@ -301,7 +311,7 @@
       '<div class="wrap two-up">' +
         '<a class="promo promo--gift" href="' + waLink("Olá, Banana Verde! Quero montar um presente até R$ 50.") + '" target="_blank" rel="noopener">' +
           ICON.gift +
-          '<div><p class="eyebrow">Kits e presentes</p><strong>Presentes até R$ 50</strong><span>Seleção de kits ' + tbc() + " · monte o seu pelo WhatsApp</span></div>" +
+          '<div><p class="eyebrow">Kits e presentes</p><strong>Presentes até R$ 50</strong><span>Kits prontos para presentear · monte o seu pelo WhatsApp</span></div>' +
         "</a>" +
         '<a class="promo promo--blog" href="#/produto/filtro-de-barro">' +
           ICON.leaf +
@@ -382,7 +392,7 @@
           '<p class="eyebrow">' + esc(c.name) + "</p>" +
           '<h1 class="h1 h1--product">' + esc(p.name) + "</h1>" +
           '<div class="product-price">' + priceHTML(p) + "</div>" +
-          '<p class="installments">' + ICON.card + "<span>Parcele no cartão de crédito · nº de parcelas " + tbc() + "</span></p>" +
+          '<p class="installments">' + ICON.card + "<span>" + installmentsText(p.price) + " no cartão de crédito</span></p>" +
           stockHTML(p) +
           '<p class="product-desc">' + esc(p.desc) + "</p>" +
           '<div class="qty-row">' +
@@ -400,9 +410,9 @@
           '<div class="product-delivery">' +
             "<h2>Como receber</h2>" +
             '<ul class="mini-list">' +
-              "<li>" + ICON.store + "<span><strong>Retirar na loja</strong> — " + esc(STORE.address) + "</span></li>" +
-              "<li>" + ICON.bike + "<span><strong>Entrega em Porto Alegre</strong> — custo e prazo " + tbc() + "</span></li>" +
-              "<li>" + ICON.box + "<span><strong>Envio para a sua casa</strong> — frete pelo CEP " + tbc() + "</span></li>" +
+              "<li>" + ICON.store + "<span><strong>Retirar na loja</strong> — grátis, " + SIM.pickup.time + "</span></li>" +
+              "<li>" + ICON.bike + "<span><strong>Entrega em Porto Alegre</strong> — " + money(SIM.poa.fee) + ", " + SIM.poa.time + " (grátis acima de " + money(SIM.freePoaFrom) + ")</span></li>" +
+              "<li>" + ICON.box + "<span><strong>Envio para a sua casa</strong> — " + money(SIM.ship.fee) + ", " + SIM.ship.time + "</span></li>" +
             "</ul>" +
           "</div>" +
         "</div>" +
@@ -461,8 +471,7 @@
         '<div class="summary-row"><span>Subtotal</span><span>' + totalHTML(t) + "</span></div>" +
         '<div class="summary-row"><span>Entrega</span><span>escolha no próximo passo</span></div>' +
         '<div class="summary-row summary-row--total"><span>Total</span><span>' + totalHTML(t) + "</span></div>" +
-        (t.complete ? "" : '<p class="small muted">O total aparece assim que os preços forem confirmados pela loja.</p>') +
-        '<p class="installments">' + ICON.card + "<span>Parcele no cartão de crédito</span></p>" +
+        '<p class="installments">' + ICON.card + "<span>" + installmentsText(t.subtotal) + "</span></p>" +
         '<a class="btn btn--primary btn--block" href="#/checkout">Finalizar compra</a>' +
         '<a class="btn btn--wa-outline btn--block" href="' + waLink(cartMessage(t)) + '" target="_blank" rel="noopener">' + ICON.wa + " Enviar carrinho pelo WhatsApp</a>" +
         '<a class="link center" href="#/categoria/casa-ecologica">Continuar comprando</a>' +
@@ -502,32 +511,52 @@
           '<label class="field"><span>E-mail <em>(opcional)</em></span><input name="email" type="email" autocomplete="email" value="' + esc(s.email) + '"></label>' +
         "</fieldset>" +
         '<fieldset class="step"><legend><span>2</span> Como receber</legend>' +
-          opt("retirada", ICON.store, "Retirar na loja", esc(STORE.address) + " · prazo para retirada " + tbc()) +
-          opt("poa", ICON.bike, "Entrega em Porto Alegre", "custo e prazo " + tbc()) +
-          opt("envio", ICON.box, "Envio para o meu endereço", "frete e prazo calculados pelo CEP " + tbc()) +
+          opt("retirada", ICON.store, "Retirar na loja · Grátis", esc(STORE.address) + " · " + SIM.pickup.time) +
+          opt("poa", ICON.bike, "Entrega em Porto Alegre · " + feeText(deliveryFee("poa", t.subtotal)), SIM.poa.time + " · grátis acima de " + money(SIM.freePoaFrom)) +
+          opt("envio", ICON.box, "Envio para o meu endereço · " + money(SIM.ship.fee), SIM.ship.time) +
           '<label class="field" data-cep-field' + (s.delivery === "retirada" ? " hidden" : "") + '><span>CEP</span><input name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9" value="' + esc(s.cep) + '"></label>' +
         "</fieldset>" +
         '<fieldset class="step"><legend><span>3</span> Pagamento</legend>' +
-          '<label class="option"><input type="radio" name="pay" value="cartao" checked><span class="option-box">' + ICON.card + "<span><strong>Cartão de crédito</strong><small>parcelado · nº de parcelas " + tbc() + "</small></span></span></label>" +
+          '<label class="option"><input type="radio" name="pay" value="cartao" checked><span class="option-box">' + ICON.card + "<span><strong>Cartão de crédito</strong><small>em até " + SIM.maxInstallments + "x sem juros</small></span></span></label>" +
           '<div class="pay-placeholder">' +
             '<div class="fake-field">Número do cartão</div>' +
             '<div class="fake-row"><div class="fake-field">Validade</div><div class="fake-field">CVV</div></div>' +
-            '<div class="fake-field">Parcelas ' + tbc() + "</div>" +
-            "<p>Na loja real, esta etapa é feita pelo provedor de pagamento escolhido com a Banana Verde. Nesta prévia, nenhum dado de cartão é pedido.</p>" +
+            '<div class="fake-field" data-co-installments>' + installmentsOptions(t) + "</div>" +
+            "<p>Pagamento seguro. Nesta demonstração nenhum dado de cartão é pedido e nada é cobrado.</p>" +
           "</div>" +
         "</fieldset>" +
         '<p class="form-error" data-form-error hidden>Preencha o seu nome e WhatsApp para continuar.</p>' +
         '<button type="submit" class="btn btn--primary btn--block">Finalizar pedido</button>' +
       "</form>" +
-      '<aside class="summary">' +
-        "<h2>Resumo</h2>" +
-        t.lines.map(function (l) {
-          return '<div class="summary-row"><span>' + l.qty + "× " + esc(l.p.name) + "</span><span>" + (l.line === null ? tbc() : money(l.line)) + "</span></div>";
-        }).join("") +
-        '<div class="summary-row"><span>Entrega</span><span>' + (s.delivery === "retirada" ? "Retirada na loja" : tbc()) + "</span></div>" +
-        '<div class="summary-row summary-row--total"><span>Total</span><span>' + totalHTML(t) + "</span></div>" +
-      "</aside>" +
+      '<aside class="summary" data-co-summary>' + checkoutSummaryHTML(t) + "</aside>" +
     "</div></section>";
+  }
+
+  function checkoutTotal(t) {
+    var fee = deliveryFee(checkoutState.delivery, t.subtotal, checkoutState.cep);
+    return { fee: fee, total: Math.round((t.subtotal + (fee || 0)) * 100) / 100 };
+  }
+  function installmentsOptions(t) {
+    var n = installmentsCount(checkoutTotal(t).total);
+    return "Parcelas: " + (n < 2 ? "1x" : "até " + installmentsText(checkoutTotal(t).total));
+  }
+  function checkoutSummaryHTML(t) {
+    var ct = checkoutTotal(t);
+    return "<h2>Resumo</h2>" +
+      t.lines.map(function (l) {
+        return '<div class="summary-row"><span>' + l.qty + "× " + esc(l.p.name) + "</span><span>" + money(l.line) + "</span></div>";
+      }).join("") +
+      '<div class="summary-row"><span>Subtotal</span><span>' + money(t.subtotal) + "</span></div>" +
+      '<div class="summary-row"><span>Entrega</span><span>' + feeText(ct.fee) + "</span></div>" +
+      '<div class="summary-row summary-row--total"><span>Total</span><span>' + money(ct.total) + "</span></div>" +
+      '<p class="installments">' + ICON.card + "<span>" + installmentsText(ct.total) + "</span></p>";
+  }
+  function refreshCheckoutSummary() {
+    var t = cartTotals();
+    var el = document.querySelector("[data-co-summary]");
+    if (el) el.innerHTML = checkoutSummaryHTML(t);
+    var inst = document.querySelector("[data-co-installments]");
+    if (inst) inst.innerHTML = installmentsOptions(t);
   }
 
   var lastOrder = null;
@@ -539,18 +568,20 @@
     var extra = "\nNome: " + o.name + "\nWhatsApp: " + o.phone +
       (o.email ? "\nE-mail: " + o.email : "") +
       "\nRecebimento: " + deliveryLabel + (o.cep ? " · CEP " + o.cep : "") +
-      "\nPagamento: cartão de crédito parcelado";
+      "\nEntrega: " + feeText(o.fee) + "\nTotal: " + money(o.total) +
+      "\nPagamento: cartão de crédito, " + installmentsText(o.total);
     return '' +
     '<section class="page-head"><div class="wrap order-done">' +
       '<span class="done-icon">' + ICON.check + "</span>" +
       '<h1 class="h1 h1--page">Pedido montado, ' + esc(o.name.split(" ")[0]) + "!</h1>" +
-      '<p class="lead">Esta é uma prévia da loja online: <strong>nada foi cobrado.</strong> Na loja real, o pagamento acontece aqui mesmo.</p>' +
+      '<p class="lead">Recebemos o seu pedido. A Banana Verde confirma tudo pelo WhatsApp.</p><p class="small muted">Demonstração: nada foi cobrado.</p>' +
       '<div class="summary">' +
         o.totals.lines.map(function (l) {
           return '<div class="summary-row"><span>' + l.qty + "× " + esc(l.p.name) + "</span><span>" + (l.line === null ? tbc() : money(l.line)) + "</span></div>";
         }).join("") +
         '<div class="summary-row"><span>Recebimento</span><span>' + esc(deliveryLabel) + "</span></div>" +
-        '<div class="summary-row summary-row--total"><span>Total</span><span>' + totalHTML(o.totals) + "</span></div>" +
+        '<div class="summary-row"><span>Entrega</span><span>' + feeText(o.fee) + "</span></div>" +
+        '<div class="summary-row summary-row--total"><span>Total</span><span>' + money(o.total) + "</span></div>" +
       "</div>" +
       '<a class="btn btn--wa btn--block" href="' + waLink(cartMessage(o.totals, extra)) + '" target="_blank" rel="noopener">' + ICON.wa + " Enviar este pedido pelo WhatsApp</a>" +
       '<a class="btn btn--ghost btn--block" href="#/">Voltar ao início</a>' +
@@ -590,7 +621,7 @@
           "</ul>" +
         "</div>" +
       "</div>" +
-      '<p class="footer-note wrap">Prévia da nova loja online · produção Femik</p>';
+      '<p class="footer-note wrap">Demonstração Femik · fotos ilustrativas e preços simulados</p>';
 
     document.querySelector("[data-wa-float]").href = waLink("Olá, Banana Verde! Vim pela loja online.");
   }
@@ -669,7 +700,7 @@
 
   function resultRow(p) {
     return '<a class="result" href="#/produto/' + p.slug + '">' +
-      '<span class="result-thumb ph--' + esc(p.tone) + '">' + ICON.leaf + "</span>" +
+      '<span class="result-thumb ph--' + esc(p.tone) + '">' + ICON.leaf + (p.photo ? '<img class="ph-img" src="' + esc(p.photo) + '" alt="">' : "") + "</span>" +
       '<span class="result-text"><strong>' + esc(p.name) + "</strong><small>" + esc(getCat(p.cat).name) + "</small></span>" +
       priceHTML(p) +
     "</a>";
@@ -767,13 +798,7 @@
       checkoutState.delivery = e.target.value;
       var cep = document.querySelector("[data-cep-field]");
       if (cep) cep.hidden = e.target.value === "retirada";
-      var rows = document.querySelectorAll(".summary .summary-row");
-      // atualiza a linha "Entrega" do resumo sem redesenhar o formulário
-      rows.forEach(function (r) {
-        if (r.firstChild && r.firstChild.textContent === "Entrega") {
-          r.lastChild.innerHTML = e.target.value === "retirada" ? "Retirada na loja" : tbc();
-        }
-      });
+      refreshCheckoutSummary();
     }
   });
 
@@ -785,6 +810,7 @@
       e.target.value = d.length > 5 ? d.slice(0, 5) + "-" + d.slice(5) : d;
     }
     if (e.target.name in checkoutState) checkoutState[e.target.name] = e.target.value;
+    if (e.target.name === "cep") refreshCheckoutSummary();
   });
 
   document.addEventListener("submit", function (e) {
@@ -807,6 +833,8 @@
       cep: data.get("delivery") === "retirada" ? "" : String(data.get("cep") || "").trim(),
       totals: cartTotals()
     };
+    var ctOrder = checkoutTotal(lastOrder.totals);
+    lastOrder.fee = ctOrder.fee; lastOrder.total = ctOrder.total;
     cart = {}; saveCart();
     location.hash = "#/pedido";
   });
@@ -814,6 +842,14 @@
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") closeSearch();
   });
+
+  // foto que não carrega: remove a imagem e deixa a ilustração
+  document.addEventListener("error", function (e) {
+    var t = e.target;
+    if (!t || t.tagName !== "IMG") return;
+    if (t.classList.contains("hero-img")) t.parentNode.remove();
+    else if (t.classList.contains("ph-img")) t.remove();
+  }, true);
 
   window.addEventListener("hashchange", route);
 

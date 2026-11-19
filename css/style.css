@@ -259,11 +259,7 @@ main:focus { outline: none; }
   background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 10px, transparent 10px 20px);
   color: var(--ph-ink, #2f5d3f);
 }
-.ph::after {
-  content: ""; position: absolute; inset: 8px;
-  border: 1.5px dashed currentColor; border-radius: 10px; opacity: .35;
-  pointer-events: none;
-}
+
 .ph svg { width: 30px; height: 30px; opacity: .75; }
 .ph-name { font-family: var(--serif); font-weight: 700; font-size: 17px; line-height: 1.15; }
 .ph-note { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; opacity: .72; }
@@ -271,7 +267,11 @@ main:focus { outline: none; }
 .ph--big svg { width: 44px; height: 44px; }
 .ph--big .ph-name { font-size: 28px; }
 .ph--big .ph-note { font-size: 12px; }
-.ph-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+.ph { overflow: hidden; }
+.ph-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.result-thumb { position: relative; overflow: hidden; }
+.hero-photo { margin-top: 22px; border-radius: 20px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--green-soft); box-shadow: var(--shadow); }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; }
 
 .ph--clay   { --ph-bg: #ecd2bd; --ph-ink: #8a4a26; }
 .ph--coffee { --ph-bg: #e3d6c6; --ph-ink: #5e4330; }
@@ -432,7 +432,6 @@ body[data-page="product"] .wa-float { display: none; }
 }
 .line-media { border-radius: 10px; overflow: hidden; display: block; }
 .line-media .ph { padding: 4px; gap: 2px; }
-.line-media .ph::after { inset: 4px; border-radius: 7px; }
 .line-media .ph svg { width: 18px; height: 18px; }
 .line-media .ph-name { font-size: 10.5px; }
 .line-media .ph-note { display: none; }
@@ -579,3 +578,10 @@ body[data-page="product"] .toast { bottom: 90px; }
 
 /* selos [a confirmar] dentro de textos em bloco */
 .perks span .tbc, .promo span .tbc, .ask span .tbc, .installments .tbc { display: inline-block; margin-top: 0; }
+
+.card-installments { color: var(--green-2); font-weight: 500; }
+@media (min-width: 900px) {
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr 1fr; column-gap: 48px; align-items: center; }
+  .hero .wrap > * { grid-column: 1; }
+  .hero .hero-photo { grid-column: 2; grid-row: 1 / span 7; margin: 0; aspect-ratio: 4 / 5; }
+}
