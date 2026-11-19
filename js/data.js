@@ -25,7 +25,7 @@ window.BV_STORE = {
   instagram: "bananaverdepoa",
   currentSite: "https://bananaverde.eco.br/",
   reviews: { count: 97, rating: "5,0", source: "Google" },
-  heroPhoto: "img/hero.jpg",
+  heroPhoto: "https://images.unsplash.com/photo-1591189863345-9db058f9f8ec",
   hours: [["Segunda a sábado", "9h às 18h"], ["Domingo", "Fechado"]],
 
   // ---- valores SIMULADOS para o mockup ----
@@ -89,21 +89,21 @@ window.BV_PRODUCTS = [
   { slug: "filtro-de-barro", name: "Filtro de barro", cat: "casa-ecologica",
     desc: "O clássico filtro de barro para a água de casa.", price: 189.9, stock: true, photo: "https://images.unsplash.com/photo-1673555136815-d19673464f37", tone: "clay", featured: true },
   { slug: "coador-de-pano-de-cafe", name: "Coador de pano de café", cat: "casa-ecologica",
-    desc: "Coador de pano reutilizável, no lugar do filtro de papel.", price: 24.9, stock: true, photo: "img/produtos/coador-de-pano-de-cafe.jpg", tone: "coffee", featured: true },
+    desc: "Coador de pano reutilizável, no lugar do filtro de papel.", price: 24.9, stock: true, photo: "https://images.unsplash.com/photo-1599837210403-1a17b48bfee2", tone: "coffee", featured: true },
   { slug: "saquinhos-reutilizaveis", name: "Saquinhos reutilizáveis", cat: "casa-ecologica",
-    desc: "Saquinhos para usar de novo e de novo, no lugar dos descartáveis.", price: 39.9, stock: true, photo: "img/produtos/saquinhos-reutilizaveis.jpg", tone: "linen", featured: false },
+    desc: "Saquinhos para usar de novo e de novo, no lugar dos descartáveis.", price: 39.9, stock: true, photo: "https://images.unsplash.com/photo-1615290144628-8fa0f0d61658", tone: "linen", featured: false },
   { slug: "bucha-vegetal", name: "Bucha vegetal", cat: "casa-ecologica",
-    desc: "Bucha natural para a louça e a limpeza.", price: 9.9, stock: true, photo: "img/produtos/bucha-vegetal.jpg", tone: "straw", featured: true },
+    desc: "Bucha natural para a louça e a limpeza.", price: 9.9, stock: true, photo: "https://images.unsplash.com/photo-1624323210693-198b0ca184b1", tone: "straw", featured: true },
   { slug: "copo-reutilizavel", name: "Copo reutilizável", cat: "casa-ecologica",
-    desc: "Um copo para levar junto e recusar o descartável.", price: 34.9, stock: true, photo: "img/produtos/copo-reutilizavel.jpg", tone: "sage", featured: true },
+    desc: "Um copo para levar junto e recusar o descartável.", price: 34.9, stock: true, photo: "https://images.unsplash.com/photo-1756460082285-86cd93abc30a", tone: "sage", featured: true },
   { slug: "canudo-de-metal", name: "Canudo de metal", cat: "casa-ecologica",
-    desc: "Canudo de metal reutilizável.", price: 19.9, stock: true, photo: "img/produtos/canudo-de-metal.jpg", tone: "steel", featured: false },
+    desc: "Canudo de metal reutilizável.", price: 19.9, stock: true, photo: "https://images.unsplash.com/photo-1685798830567-0de4234dd293", tone: "steel", featured: false },
   { slug: "composteira", name: "Composteira", cat: "casa-ecologica",
-    desc: "Para transformar os restos orgânicos da cozinha em adubo.", price: 279, stock: true, photo: "img/produtos/composteira.jpg", tone: "soil", featured: true },
+    desc: "Para transformar os restos orgânicos da cozinha em adubo.", price: 279, stock: true, photo: "https://images.unsplash.com/photo-1794675991452-c0256d287426", tone: "soil", featured: true },
 
   // ---- Outras categorias: só os produtos já citados no site atual ----
   { slug: "fraldas-de-pano", name: "Fraldas de pano", cat: "infancia-sustentavel",
-    desc: "Fraldas de pano reutilizáveis.", price: 49.9, stock: true, photo: "img/produtos/fraldas-de-pano.jpg", tone: "linen", featured: false },
+    desc: "Fraldas de pano reutilizáveis.", price: 49.9, stock: true, photo: "https://images.unsplash.com/photo-1697751947409-34218d03f668", tone: "linen", featured: false },
   { slug: "coletor-menstrual", name: "Coletor menstrual", cat: "eco-menstruacao",
-    desc: "Coletor menstrual reutilizável.", price: 89.9, stock: true, photo: "img/produtos/coletor-menstrual.jpg", tone: "rose", featured: false }
+    desc: "Coletor menstrual reutilizável.", price: 89.9, stock: true, photo: "https://images.unsplash.com/photo-1622117710944-522c13da53d9", tone: "rose", featured: false }
 ];
