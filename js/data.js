@@ -10,8 +10,9 @@
  *
  * - price: número em reais (ex.: 89.9). O carrinho soma sozinho.
  * - stock: true (em estoque) / false (esgotado).
- * - photo: caminho da foto. Se o arquivo não existir, aparece uma
- *   ilustração no lugar — o site nunca mostra imagem quebrada.
+ * - photo: caminho da foto (img/produtos/...) OU endereço do Unsplash
+ *   (images.unsplash.com/photo-...). O tamanho e o corte quadrado são
+ *   ajustados sozinhos. Se a foto não carregar, aparece uma ilustração.
  * - Só entram produtos cujo nome já aparece no site atual.
  */
 
@@ -24,6 +25,7 @@ window.BV_STORE = {
   instagram: "bananaverdepoa",
   currentSite: "https://bananaverde.eco.br/",
   reviews: { count: 97, rating: "5,0", source: "Google" },
+  heroPhoto: "img/hero.jpg",
   hours: [["Segunda a sábado", "9h às 18h"], ["Domingo", "Fechado"]],
 
   // ---- valores SIMULADOS para o mockup ----
@@ -85,7 +87,7 @@ window.BV_CATEGORIES = [
 window.BV_PRODUCTS = [
   // ---- Casa Ecológica (categoria completa da prévia) ----
   { slug: "filtro-de-barro", name: "Filtro de barro", cat: "casa-ecologica",
-    desc: "O clássico filtro de barro para a água de casa.", price: 189.9, stock: true, photo: "img/produtos/filtro-de-barro.jpg", tone: "clay", featured: true },
+    desc: "O clássico filtro de barro para a água de casa.", price: 189.9, stock: true, photo: "https://images.unsplash.com/photo-1673555136815-d19673464f37", tone: "clay", featured: true },
   { slug: "coador-de-pano-de-cafe", name: "Coador de pano de café", cat: "casa-ecologica",
     desc: "Coador de pano reutilizável, no lugar do filtro de papel.", price: 24.9, stock: true, photo: "img/produtos/coador-de-pano-de-cafe.jpg", tone: "coffee", featured: true },
   { slug: "saquinhos-reutilizaveis", name: "Saquinhos reutilizáveis", cat: "casa-ecologica",

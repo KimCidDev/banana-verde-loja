@@ -102,12 +102,18 @@
   };
   var STARS = ICON.star + ICON.star + ICON.star + ICON.star + ICON.star;
 
+  // Endereços do Unsplash: pede o tamanho certo (rápido no celular, nítido na tela retina)
+  function imgSrc(url, w, h) {
+    if (!/^https:\/\/images\.unsplash\.com\//.test(url)) return url;
+    var base = url.split("?")[0];
+    return base + "?auto=format&fit=crop&q=75&w=" + w + (h ? "&h=" + h : "");
+  }
   // Foto do produto. Se o arquivo não carregar, a imagem é removida e fica a ilustração.
   function photoHTML(p, big) {
     return '<div class="ph ph--' + esc(p.tone || "sage") + (big ? " ph--big" : "") + '">' +
       ICON.leaf +
       '<span class="ph-name">' + esc(p.name) + "</span>" +
-      (p.photo ? '<img class="ph-img" src="' + esc(p.photo) + '" alt="' + esc(p.name) + '" loading="lazy">' : "") +
+      (p.photo ? '<img class="ph-img" src="' + esc(imgSrc(p.photo, big ? 1000 : 600, big ? 750 : 600)) + '" alt="' + esc(p.name) + '" loading="lazy">' : "") +
       "</div>";
   }
 
@@ -272,7 +278,7 @@
           '<a class="btn btn--primary" href="#/categoria/casa-ecologica">Ver Casa Ecológica</a>' +
           '<a class="btn btn--wa-outline" href="' + waLink("Olá, Banana Verde! Vim pela loja online e quero tirar uma dúvida.") + '" target="_blank" rel="noopener">' + ICON.wa + " WhatsApp</a>" +
         "</div>" +
-        '<div class="hero-photo"><img class="hero-img" src="img/hero.jpg" alt="Produtos ecológicos para a casa"></div>' +
+        '<div class="hero-photo"><img class="hero-img" src="' + esc(imgSrc(STORE.heroPhoto, 1400, 1050)) + '" alt="Produtos ecológicos para a casa"></div>' +
       "</div>" +
     "</section>" +
 
@@ -700,7 +706,7 @@
 
   function resultRow(p) {
     return '<a class="result" href="#/produto/' + p.slug + '">' +
-      '<span class="result-thumb ph--' + esc(p.tone) + '">' + ICON.leaf + (p.photo ? '<img class="ph-img" src="' + esc(p.photo) + '" alt="">' : "") + "</span>" +
+      '<span class="result-thumb ph--' + esc(p.tone) + '">' + ICON.leaf + (p.photo ? '<img class="ph-img" src="' + esc(imgSrc(p.photo, 120, 120)) + '" alt="">' : "") + "</span>" +
       '<span class="result-text"><strong>' + esc(p.name) + "</strong><small>" + esc(getCat(p.cat).name) + "</small></span>" +
       priceHTML(p) +
     "</a>";
