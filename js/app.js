@@ -81,6 +81,7 @@
   }
   var MAPS_QUERY = encodeURIComponent("Banana Verde, " + STORE.address + ", Porto Alegre - RS");
   var MAPS_LINK = "https://www.google.com/maps/search/?api=1&query=" + MAPS_QUERY;
+  var TEL = "tel:+" + STORE.whatsapp;
   var INSTAGRAM = "https://www.instagram.com/" + STORE.instagram + "/";
 
   var ICON = {
@@ -98,6 +99,11 @@
     trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
     arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+    phone: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z"/></svg>',
+    chevL: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>',
+    chevR: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>',
+    pix: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12z"/><path d="M8 12h8M12 8v8"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>',
     check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>'
   };
   var STARS = ICON.star + ICON.star + ICON.star + ICON.star + ICON.star;
@@ -110,7 +116,7 @@
   }
   // Foto do produto. Se o arquivo não carregar, a imagem é removida e fica a ilustração.
   function photoHTML(p, big) {
-    return '<div class="ph ph--' + esc(p.tone || "sage") + (big ? " ph--big" : "") + '">' +
+    return '<div class="ph ph--' + esc(p.tone || "sage") + (big ? " ph--big" : "") + (p.photo ? "" : " ph--fallback") + '">' +
       ICON.leaf +
       '<span class="ph-name">' + esc(p.name) + "</span>" +
       (p.photo ? '<img class="ph-img" src="' + esc(imgSrc(p.photo, big ? 1000 : 600, big ? 750 : 600)) + '" alt="' + esc(p.name) + '" loading="lazy">' : "") +
@@ -216,7 +222,7 @@
     return '<a class="rating ' + (extraClass || "") + '" href="' + MAPS_LINK + '" target="_blank" rel="noopener">' +
       '<span class="stars">' + STARS + "</span>" +
       "<strong>" + STORE.reviews.rating + "</strong>" +
-      "<span>" + STORE.reviews.count + " avaliações no " + STORE.reviews.source + "</span>" +
+      "<span>no " + STORE.reviews.source + "</span>" +
     "</a>";
   }
 
@@ -245,9 +251,11 @@
           '<div class="visit-info">' +
             '<p class="visit-address">' + ICON.pin + "<span><strong>" + esc(STORE.address) + "</strong><br>" + esc(STORE.district) + "<br><em>Em frente ao parque — é só atravessar a rua.</em></span></p>" +
             hoursHTML() +
+            '<p class="visit-phone"><a href="' + TEL + '">' + esc(STORE.phoneDisplay) + "</a></p>" +
             '<div class="visit-actions">' +
-              '<a class="btn btn--wa" href="' + waLink("Olá, Banana Verde! Vim pela loja online.") + '" target="_blank" rel="noopener">' + ICON.wa + " " + esc(STORE.phoneDisplay) + "</a>" +
-              '<a class="btn btn--ghost" href="' + MAPS_LINK + '" target="_blank" rel="noopener">Como chegar</a>' +
+              '<a class="btn btn--wa" href="' + waLink("Olá, Banana Verde! Vim pela loja online.") + '" target="_blank" rel="noopener">' + ICON.wa + " WhatsApp</a>" +
+              '<a class="btn btn--ghost" href="' + TEL + '">' + ICON.phone + " Ligar</a>" +
+              '<a class="btn btn--ghost visit-route" href="' + MAPS_LINK + '" target="_blank" rel="noopener">' + ICON.pin + " Como chegar</a>" +
             "</div>" +
           "</div>" +
           '<div class="map">' +
@@ -290,7 +298,11 @@
       '<div class="wrap">' +
         '<div class="section-head"><h2 class="h2">Mais vistos</h2><a class="link" href="#/categoria/casa-ecologica">Ver todos</a></div>' +
       "</div>" +
-      '<div class="rail" aria-label="Produtos em destaque">' + featured.map(cardHTML).join("") + "</div>" +
+      '<div class="rail-wrap" data-rail-wrap>' +
+        '<button type="button" class="rail-arrow rail-arrow--prev" data-action="rail-prev" aria-label="Produtos anteriores" disabled>' + ICON.chevL + "</button>" +
+        '<div class="rail" data-rail aria-label="Produtos em destaque">' + featured.map(cardHTML).join("") + "</div>" +
+        '<button type="button" class="rail-arrow rail-arrow--next" data-action="rail-next" aria-label="Mais produtos">' + ICON.chevR + "</button>" +
+      "</div>" +
     "</section>" +
 
     '<section class="section">' +
@@ -330,7 +342,7 @@
       '<div class="wrap">' +
         '<p class="eyebrow">Quem compra, recomenda</p>' +
         '<div class="reviews-score"><span class="big">' + STORE.reviews.rating + '</span><span class="stars">' + STARS + "</span></div>" +
-        "<p>" + STORE.reviews.count + " avaliações no Google, todas 5 estrelas.</p>" +
+        "<p>Nota máxima no Google, dada por quem compra na loja.</p>" +
         '<a class="btn btn--ghost" href="' + MAPS_LINK + '" target="_blank" rel="noopener">Ler as avaliações no Google</a>' +
       "</div>" +
     "</section>" +
@@ -356,8 +368,9 @@
     var grid = list.length ? '<div class="grid">' + list.map(cardHTML).join("") + "</div>" : "";
     var building = !c.ready
       ? '<div class="notice">' +
-          "<strong>Vitrine completa em breve.</strong>" +
-          "<p>Os produtos desta categoria entram na loja online na próxima etapa. Enquanto isso, a loja responde na hora pelo WhatsApp.</p>" +
+          (list.length
+            ? "<strong>Mais produtos em breve.</strong><p>A vitrine de " + esc(c.name) + " está crescendo. Procura outro item? A loja responde na hora pelo WhatsApp.</p>"
+            : "<strong>Vitrine completa em breve.</strong><p>Os produtos desta categoria entram na loja online na próxima etapa. Enquanto isso, a loja responde na hora pelo WhatsApp.</p>") +
           '<a class="btn btn--wa" href="' + waLink("Olá, Banana Verde! Quero ver os produtos de " + c.name + ".") + '" target="_blank" rel="noopener">' + ICON.wa + " Ver produtos de " + esc(c.name) + "</a>" +
         "</div>"
       : "";
@@ -398,7 +411,7 @@
           '<p class="eyebrow">' + esc(c.name) + "</p>" +
           '<h1 class="h1 h1--product">' + esc(p.name) + "</h1>" +
           '<div class="product-price">' + priceHTML(p) + "</div>" +
-          '<p class="installments">' + ICON.card + "<span>" + installmentsText(p.price) + " no cartão de crédito</span></p>" +
+          '<p class="installments">' + ICON.card + "<span>" + installmentsText(p.price).replace(" no cartão", "") + " no cartão de crédito</span></p>" +
           stockHTML(p) +
           '<p class="product-desc">' + esc(p.desc) + "</p>" +
           '<div class="qty-row">' +
@@ -427,7 +440,11 @@
     (related.length
       ? '<section class="section">' +
           '<div class="wrap"><div class="section-head"><h2 class="h2">Também em ' + esc(c.name) + '</h2><a class="link" href="#/categoria/' + c.slug + '">Ver todos</a></div></div>' +
-          '<div class="rail">' + related.map(cardHTML).join("") + "</div>" +
+          '<div class="rail-wrap" data-rail-wrap>' +
+        '<button type="button" class="rail-arrow rail-arrow--prev" data-action="rail-prev" aria-label="Produtos anteriores" disabled>' + ICON.chevL + "</button>" +
+        '<div class="rail" data-rail aria-label="Produtos relacionados">' + related.map(cardHTML).join("") + "</div>" +
+        '<button type="button" class="rail-arrow rail-arrow--next" data-action="rail-next" aria-label="Mais produtos">' + ICON.chevR + "</button>" +
+      "</div>" +
         "</section>"
       : "") +
     '<div class="sticky-buy">' +
@@ -492,7 +509,7 @@
     return msg;
   }
 
-  var checkoutState = { name: "", phone: "", email: "", delivery: "retirada", cep: "" };
+  var checkoutState = { name: "", phone: "", email: "", delivery: "retirada", cep: "", street: "", number: "", complement: "", pay: "pix" };
 
   function renderCheckout() {
     var t = cartTotals();
@@ -523,16 +540,19 @@
           opt("poa", ICON.bike, "Entrega em Porto Alegre · " + feeText(deliveryFee("poa", t.subtotal)), SIM.poa.time + " · grátis acima de " + money(SIM.freePoaFrom)) +
           opt("envio", ICON.box, "Envio para o meu endereço · " + money(SIM.ship.fee),
             localOnly ? "Indisponível: picolé congelado sai só para retirada ou entrega em Porto Alegre" : SIM.ship.time, localOnly) +
-          '<label class="field" data-cep-field' + (s.delivery === "retirada" ? " hidden" : "") + '><span>CEP</span><input name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9" value="' + esc(s.cep) + '"></label>' +
+          '<div class="address" data-cep-field' + (s.delivery === "retirada" ? " hidden" : "") + ">" +
+            '<label class="field"><span>CEP</span><input name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9" value="' + esc(s.cep) + '"></label>' +
+            '<label class="field"><span>Rua</span><input name="street" autocomplete="address-line1" value="' + esc(s.street) + '"></label>' +
+            '<div class="field-row">' +
+              '<label class="field"><span>Número</span><input name="number" inputmode="numeric" value="' + esc(s.number) + '"></label>' +
+              '<label class="field"><span>Complemento <em>(opcional)</em></span><input name="complement" autocomplete="address-line2" value="' + esc(s.complement) + '"></label>' +
+            "</div>" +
+          "</div>" +
         "</fieldset>" +
         '<fieldset class="step"><legend><span>3</span> Pagamento</legend>' +
-          '<label class="option"><input type="radio" name="pay" value="cartao" checked><span class="option-box">' + ICON.card + "<span><strong>Cartão de crédito</strong><small>em até " + SIM.maxInstallments + "x sem juros</small></span></span></label>" +
-          '<div class="pay-placeholder">' +
-            '<div class="fake-field">Número do cartão</div>' +
-            '<div class="fake-row"><div class="fake-field">Validade</div><div class="fake-field">CVV</div></div>' +
-            '<div class="fake-field" data-co-installments>' + installmentsOptions(t) + "</div>" +
-            "<p>Pagamento seguro. Nesta demonstração nenhum dado de cartão é pedido e nada é cobrado.</p>" +
-          "</div>" +
+          '<label class="option"><input type="radio" name="pay" value="pix"' + (s.pay === "pix" ? " checked" : "") + '><span class="option-box">' + ICON.pix + "<span><strong>Pix</strong><small>aprovação na hora · QR Code ou copia e cola</small></span></span></label>" +
+          '<label class="option"><input type="radio" name="pay" value="cartao"' + (s.pay === "cartao" ? " checked" : "") + '><span class="option-box">' + ICON.card + '<span><strong>Cartão de crédito</strong><small data-co-installments>' + installmentsOptions(t) + "</small></span></span></label>" +
+          '<div class="pay-secure">' + ICON.lock + "<p>Você paga em ambiente seguro na próxima etapa. Seus dados de pagamento não passam por este formulário.</p></div>" +
         "</fieldset>" +
         '<p class="form-error" data-form-error hidden>Preencha o seu nome e WhatsApp para continuar.</p>' +
         '<button type="submit" class="btn btn--primary btn--block">Finalizar pedido</button>' +
@@ -547,7 +567,7 @@
   }
   function installmentsOptions(t) {
     var n = installmentsCount(checkoutTotal(t).total);
-    return "Parcelas: " + (n < 2 ? "1x" : "até " + installmentsText(checkoutTotal(t).total));
+    return n < 2 ? "à vista" : "em até " + installmentsText(checkoutTotal(t).total);
   }
   function checkoutSummaryHTML(t) {
     var ct = checkoutTotal(t);
@@ -558,7 +578,7 @@
       '<div class="summary-row"><span>Subtotal</span><span>' + money(t.subtotal) + "</span></div>" +
       '<div class="summary-row"><span>Entrega</span><span>' + feeText(ct.fee) + "</span></div>" +
       '<div class="summary-row summary-row--total"><span>Total</span><span>' + money(ct.total) + "</span></div>" +
-      '<p class="installments">' + ICON.card + "<span>" + installmentsText(ct.total) + "</span></p>";
+      '<p class="installments">' + (checkoutState.pay === "pix" ? ICON.pix + "<span>Pix · aprovação na hora</span>" : ICON.card + "<span>" + installmentsText(ct.total) + "</span>") + "</p>";
   }
   function refreshCheckoutSummary() {
     var t = cartTotals();
@@ -576,9 +596,9 @@
     var deliveryLabel = { retirada: "Retirar na loja (" + STORE.address + ")", poa: "Entrega em Porto Alegre", envio: "Envio para o endereço" }[o.delivery];
     var extra = "\nNome: " + o.name + "\nWhatsApp: " + o.phone +
       (o.email ? "\nE-mail: " + o.email : "") +
-      "\nRecebimento: " + deliveryLabel + (o.cep ? " · CEP " + o.cep : "") +
+      "\nRecebimento: " + deliveryLabel + (o.address ? "\nEndereço: " + o.address : "") + (o.cep ? " · CEP " + o.cep : "") +
       "\nEntrega: " + feeText(o.fee) + "\nTotal: " + money(o.total) +
-      "\nPagamento: cartão de crédito, " + installmentsText(o.total);
+      "\nPagamento: " + (o.pay === "pix" ? "Pix" : "cartão de crédito, " + installmentsText(o.total));
     return '' +
     '<section class="page-head"><div class="wrap order-done">' +
       '<span class="done-icon">' + ICON.check + "</span>" +
@@ -590,6 +610,7 @@
         }).join("") +
         '<div class="summary-row"><span>Recebimento</span><span>' + esc(deliveryLabel) + "</span></div>" +
         '<div class="summary-row"><span>Entrega</span><span>' + feeText(o.fee) + "</span></div>" +
+        '<div class="summary-row"><span>Pagamento</span><span>' + (o.pay === "pix" ? "Pix" : "Cartão · " + installmentsText(o.total, true)) + "</span></div>" +
         '<div class="summary-row summary-row--total"><span>Total</span><span>' + money(o.total) + "</span></div>" +
       "</div>" +
       '<a class="btn btn--wa btn--block" href="' + waLink(cartMessage(o.totals, extra)) + '" target="_blank" rel="noopener">' + ICON.wa + " Enviar este pedido pelo WhatsApp</a>" +
@@ -625,7 +646,8 @@
           "<h2>Contato</h2>" +
           "<ul>" +
             "<li>" + esc(STORE.address) + "<br>" + esc(STORE.district) + "</li>" +
-            '<li><a href="' + waLink("Olá, Banana Verde!") + '" target="_blank" rel="noopener">WhatsApp ' + esc(STORE.phoneDisplay) + "</a></li>" +
+            '<li><a href="' + TEL + '">Telefone ' + esc(STORE.phoneDisplay) + "</a></li>" +
+            '<li><a href="' + waLink("Olá, Banana Verde!") + '" target="_blank" rel="noopener">WhatsApp</a></li>' +
             '<li><a href="' + INSTAGRAM + '" target="_blank" rel="noopener">Instagram @' + STORE.instagram + "</a></li>" +
           "</ul>" +
         "</div>" +
@@ -676,6 +698,8 @@
     clearTimeout(toastTimer); toastEl.classList.remove("show"); toastEl.hidden = true;
     window.scrollTo(0, 0);
     onScroll();
+    updateRails();
+    markLoaded();
     updateBadge();
   }
 
@@ -720,7 +744,7 @@
     var nq = norm(q);
     if (!nq) {
       searchResults.innerHTML =
-        '<p class="search-label">Mais procurados</p>' +
+        '<p class="search-label">Mais vistos</p>' +
         '<div class="chips">' + PRODUCTS.filter(function (p) { return p.featured; }).map(function (p) {
           return '<button type="button" class="chip chip--btn" data-action="search-suggest" data-q="' + esc(p.name) + '">' + esc(p.name) + "</button>";
         }).join("") + "</div>" +
@@ -797,6 +821,11 @@
         addToCart(slug, q);
         toast(ICON.check + " <span><strong>" + q + "× " + esc(p.name) + '</strong> no carrinho</span><a href="#/carrinho">Ver</a>');
         break;
+      case "rail-prev":
+      case "rail-next":
+        var r = el.parentNode.querySelector("[data-rail]");
+        r.scrollBy({ left: (action === "rail-next" ? 1 : -1) * r.clientWidth * 0.8, behavior: "smooth" });
+        break;
       case "cart-inc": setQty(slug, (cart[slug] || 0) + 1); route(); break;
       case "cart-dec": setQty(slug, (cart[slug] || 0) - 1); route(); break;
       case "cart-remove": setQty(slug, 0); route(); break;
@@ -810,6 +839,7 @@
       if (cep) cep.hidden = e.target.value === "retirada";
       refreshCheckoutSummary();
     }
+    if (e.target.name === "pay") { checkoutState.pay = e.target.value; refreshCheckoutSummary(); }
   });
 
   document.addEventListener("input", function (e) {
@@ -836,11 +866,24 @@
       (name ? f.querySelector("[name=phone]") : f.querySelector("[name=name]")).focus();
       return;
     }
+    var delivery = String(data.get("delivery") || "retirada");
+    if (delivery !== "retirada") {
+      var miss = ["cep", "street", "number"].filter(function (k) {
+        var v = String(data.get(k) || "").trim();
+        return k === "cep" ? v.replace(/\D/g, "").length !== 8 : !v;
+      });
+      if (miss.length) {
+        err.textContent = "Preencha CEP, rua e número para a entrega.";
+        err.hidden = false; f.querySelector("[name=" + miss[0] + "]").focus(); return;
+      }
+    }
     err.hidden = true;
     lastOrder = {
       name: name, phone: phone, email: String(data.get("email") || "").trim(),
       delivery: String(data.get("delivery") || "retirada"),
-      cep: data.get("delivery") === "retirada" ? "" : String(data.get("cep") || "").trim(),
+      cep: delivery === "retirada" ? "" : String(data.get("cep") || "").trim(),
+      address: delivery === "retirada" ? "" : [data.get("street"), data.get("number"), data.get("complement")].map(function (v) { return String(v || "").trim(); }).filter(Boolean).join(", "),
+      pay: String(data.get("pay") || "pix"),
       totals: cartTotals()
     };
     var ctOrder = checkoutTotal(lastOrder.totals);
@@ -853,17 +896,41 @@
     if (e.key === "Escape") closeSearch();
   });
 
+  function markLoaded() {
+    document.querySelectorAll("img.ph-img, img.hero-img").forEach(function (i) { if (i.complete && i.naturalWidth) i.classList.add("is-loaded"); });
+  }
+  document.addEventListener("load", function (e) {
+    var t = e.target;
+    if (t && t.tagName === "IMG") t.classList.add("is-loaded");
+  }, true);
+
   // foto que não carrega: remove a imagem e deixa a ilustração
   document.addEventListener("error", function (e) {
     var t = e.target;
     if (!t || t.tagName !== "IMG") return;
     if (t.classList.contains("hero-img")) t.parentNode.remove();
-    else if (t.classList.contains("ph-img")) t.remove();
+    else if (t.classList.contains("ph-img")) { t.parentNode.classList.add("ph--fallback"); t.remove(); }
   }, true);
 
   var header = document.querySelector(".site-header");
   function onScroll() { header.classList.toggle("is-scrolled", window.scrollY > 8); }
   window.addEventListener("scroll", onScroll, { passive: true });
+
+  // setas do carrossel: some a seta quando chega no começo/fim
+  function updateRails() {
+    document.querySelectorAll("[data-rail-wrap]").forEach(function (w) {
+      var r = w.querySelector("[data-rail]");
+      var max = r.scrollWidth - r.clientWidth - 4;
+      w.querySelector(".rail-arrow--prev").disabled = r.scrollLeft <= 4;
+      w.querySelector(".rail-arrow--next").disabled = r.scrollLeft >= max;
+      w.classList.toggle("at-end", r.scrollLeft >= max);
+      w.classList.toggle("at-start", r.scrollLeft <= 4);
+    });
+  }
+  document.addEventListener("scroll", function (e) {
+    if (e.target && e.target.matches && e.target.matches("[data-rail]")) updateRails();
+  }, true);
+  window.addEventListener("resize", updateRails);
 
   window.addEventListener("hashchange", route);
 
