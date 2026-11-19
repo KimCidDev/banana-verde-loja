@@ -204,7 +204,7 @@
 
   function catTileHTML(c) {
     var n = productsOf(c.slug).length;
-    var sub = c.ready ? n + " produtos na vitrine" : (n ? n + " produto · vitrine em montagem" : "vitrine em montagem");
+    var sub = c.ready ? n + (n === 1 ? " produto na vitrine" : " produtos na vitrine") : (n ? n + " produto · vitrine em montagem" : "vitrine em montagem");
     return '<a class="cat-tile cat-tile--' + c.slug + (c.ready ? " is-ready" : "") + '" href="#/categoria/' + c.slug + '">' +
       '<span class="cat-tile-name">' + esc(c.name) + "</span>" +
       '<span class="cat-tile-sub">' + sub + "</span>" +
@@ -262,7 +262,7 @@
 
   function renderHome() {
     var casa = getCat("casa-ecologica");
-    var featured = PRODUCTS.filter(function (p) { return p.cat === casa.slug; });
+    var featured = PRODUCTS.filter(function (p) { return p.featured; });
     return '' +
     '<section class="hero">' +
       '<div class="wrap">' +
@@ -288,7 +288,7 @@
 
     '<section class="section">' +
       '<div class="wrap">' +
-        '<div class="section-head"><h2 class="h2">Mais vistos em Casa Ecológica</h2><a class="link" href="#/categoria/casa-ecologica">Ver todos</a></div>' +
+        '<div class="section-head"><h2 class="h2">Mais vistos</h2><a class="link" href="#/categoria/casa-ecologica">Ver todos</a></div>' +
       "</div>" +
       '<div class="rail" aria-label="Produtos em destaque">' + featured.map(cardHTML).join("") + "</div>" +
     "</section>" +
@@ -418,7 +418,7 @@
             '<ul class="mini-list">' +
               "<li>" + ICON.store + "<span><strong>Retirar na loja</strong> — grátis, " + SIM.pickup.time + "</span></li>" +
               "<li>" + ICON.bike + "<span><strong>Entrega em Porto Alegre</strong> — " + money(SIM.poa.fee) + ", " + SIM.poa.time + " (grátis acima de " + money(SIM.freePoaFrom) + ")</span></li>" +
-              "<li>" + ICON.box + "<span><strong>Envio para a sua casa</strong> — " + money(SIM.ship.fee) + ", " + SIM.ship.time + "</span></li>" +
+              (p.localOnly ? "" : "<li>" + ICON.box + "<span><strong>Envio para a sua casa</strong> — " + money(SIM.ship.fee) + ", " + SIM.ship.time + "</span></li>") +
             "</ul>" +
           "</div>" +
         "</div>" +
@@ -498,9 +498,11 @@
     var t = cartTotals();
     if (t.count === 0) { location.hash = "#/carrinho"; return ""; }
     var s = checkoutState;
-    function opt(val, icon, title, sub) {
-      return '<label class="option">' +
-        '<input type="radio" name="delivery" value="' + val + '"' + (s.delivery === val ? " checked" : "") + ">" +
+    var localOnly = t.lines.some(function (l) { return l.p.localOnly; });
+    if (localOnly && s.delivery === "envio") s.delivery = "retirada";
+    function opt(val, icon, title, sub, disabled) {
+      return '<label class="option' + (disabled ? " is-disabled" : "") + '">' +
+        '<input type="radio" name="delivery" value="' + val + '"' + (s.delivery === val ? " checked" : "") + (disabled ? " disabled" : "") + ">" +
         '<span class="option-box">' + icon + "<span><strong>" + title + "</strong><small>" + sub + "</small></span></span>" +
       "</label>";
     }
@@ -519,7 +521,8 @@
         '<fieldset class="step"><legend><span>2</span> Como receber</legend>' +
           opt("retirada", ICON.store, "Retirar na loja · Grátis", esc(STORE.address) + " · " + SIM.pickup.time) +
           opt("poa", ICON.bike, "Entrega em Porto Alegre · " + feeText(deliveryFee("poa", t.subtotal)), SIM.poa.time + " · grátis acima de " + money(SIM.freePoaFrom)) +
-          opt("envio", ICON.box, "Envio para o meu endereço · " + money(SIM.ship.fee), SIM.ship.time) +
+          opt("envio", ICON.box, "Envio para o meu endereço · " + money(SIM.ship.fee),
+            localOnly ? "Indisponível: picolé congelado sai só para retirada ou entrega em Porto Alegre" : SIM.ship.time, localOnly) +
           '<label class="field" data-cep-field' + (s.delivery === "retirada" ? " hidden" : "") + '><span>CEP</span><input name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9" value="' + esc(s.cep) + '"></label>' +
         "</fieldset>" +
         '<fieldset class="step"><legend><span>3</span> Pagamento</legend>' +

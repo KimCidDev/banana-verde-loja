@@ -81,10 +81,22 @@ window.BV_CATEGORIES = [
     intro: "Higiene do dia a dia, sem tanto plástico.",
     brands: [],
     ready: false
+  },
+  {
+    slug: "picoles-artesanais",
+    name: "Picolés Artesanais",
+    intro: "Picolés artesanais para refrescar o dia. Retire na loja ou receba em Porto Alegre.",
+    brands: [],
+    ready: true
   }
 ];
 
 window.BV_PRODUCTS = [
+  // ---- Picolés (congelado: só retirada e entrega em Porto Alegre) ----
+  { slug: "picole-artesanal", name: "Picolé artesanal", cat: "picoles-artesanais",
+    desc: "Picolé artesanal, feito em pequenas quantidades. Por ser congelado, sai só para retirada na loja ou entrega em Porto Alegre.",
+    price: 9.9, stock: true, photo: "https://images.unsplash.com/photo-1633933037611-f26e54366832", tone: "rose", featured: true, localOnly: true },
+
   // ---- Casa Ecológica (categoria completa da prévia) ----
   { slug: "filtro-de-barro", name: "Filtro de barro", cat: "casa-ecologica",
     desc: "O clássico filtro de barro para a água de casa.", price: 189.9, stock: true, photo: "https://images.unsplash.com/photo-1673555136815-d19673464f37", tone: "clay", featured: true },
