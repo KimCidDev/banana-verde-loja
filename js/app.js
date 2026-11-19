@@ -675,6 +675,7 @@
     closeSearch();
     clearTimeout(toastTimer); toastEl.classList.remove("show"); toastEl.hidden = true;
     window.scrollTo(0, 0);
+    onScroll();
     updateBadge();
   }
 
@@ -859,6 +860,10 @@
     if (t.classList.contains("hero-img")) t.parentNode.remove();
     else if (t.classList.contains("ph-img")) t.remove();
   }, true);
+
+  var header = document.querySelector(".site-header");
+  function onScroll() { header.classList.toggle("is-scrolled", window.scrollY > 8); }
+  window.addEventListener("scroll", onScroll, { passive: true });
 
   window.addEventListener("hashchange", route);
 

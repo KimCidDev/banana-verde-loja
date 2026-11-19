@@ -4,6 +4,7 @@
   --green: #1f3d2b;
   --green-2: #2f5d3f;
   --green-soft: #e6eee4;
+  --mint: #dfeadb;            /* verde pálido do topo, mesma família do --green-soft */
   --banana: #f2c94c;
   --banana-soft: #fdf3d3;
   --cream: #f6f1e6;
@@ -79,8 +80,11 @@ main:focus { outline: none; }
   background: rgba(255, 253, 248, .96);
   backdrop-filter: saturate(1.4) blur(10px);
   -webkit-backdrop-filter: saturate(1.4) blur(10px);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid transparent;
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
+/* a linha/sombra do cabeçalho só aparece depois de rolar a página */
+.site-header.is-scrolled { border-bottom-color: rgba(31, 61, 43, .08); box-shadow: 0 4px 18px rgba(31, 61, 43, .06); }
 .header-inner {
   max-width: 1120px; margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between;
@@ -166,11 +170,11 @@ main:focus { outline: none; }
 /* --- hero --- */
 .hero {
   padding: 30px 0 26px;
+  /* topo em verde pálido que se dissolve no creme da página — sem linha de corte */
   background:
-    radial-gradient(120% 70% at 100% 0%, rgba(242, 201, 76, .28), transparent 60%),
-    radial-gradient(90% 60% at 0% 100%, rgba(47, 93, 63, .12), transparent 60%),
-    var(--paper);
-  border-bottom: 1px solid var(--line);
+    radial-gradient(75% 65% at 88% 45%, rgba(184, 211, 176, .42), transparent 70%),
+    radial-gradient(60% 50% at 5% 70%, rgba(214, 228, 209, .45), transparent 70%),
+    linear-gradient(to bottom, var(--paper) 0%, var(--paper) 55%, var(--cream) 100%);
 }
 .hero-search {
   display: flex; align-items: center; gap: 10px;
@@ -328,7 +332,9 @@ main:focus { outline: none; }
 .promo--blog { background: var(--green-soft); border: 1px solid #cddccb; color: var(--green); }
 
 /* avaliações */
-.reviews { text-align: center; background: var(--paper); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.reviews { text-align: center; }
+/* avaliações num cartão, como os outros blocos, em vez de uma faixa com bordas */
+.reviews .wrap { background: linear-gradient(160deg, var(--paper), #f1f6ef); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 18px; width: calc(100% - 36px); }
 .reviews-score { display: flex; align-items: center; justify-content: center; gap: 10px; }
 .reviews-score .big { font-family: var(--serif); font-weight: 700; font-size: 54px; color: var(--green); line-height: 1; }
 .reviews-score .stars { display: inline-flex; color: #e2a917; }
